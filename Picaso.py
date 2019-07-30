@@ -25,38 +25,44 @@ import time
 mouse = MouseController()
 keyboard = KeyboardController()
 
-img = cv2.imread("!!YOUR IMAGE HERE!!") #Your image file in the same directory of this script
-grayThresh = 0							#Gray brightness value
-threshStep = 15							#Gray brightness value increase amount
+img = cv2.imread("Mario.png") #Your image file in the same directory of this script
+grayThresh = 0							#Gray brightness value AKA current max rgb value
+threshStep = 30						#Gray brightness value increase amount
 
-os.system("Start mspaint")				#Image file (Grayscale)
+os.system("Start mspaint")				#Start ms paint using cmd commands
 
-time.sleep(1)
+time.sleep(1)							#Wait for ms paint to actually start before spamming left click
 
-mouse.position  = (400, 400)			#Drawing top left starting point pixel coordinates
+startPos = (400, 400)					#Drawing top left starting point pixel coordinates
+
+mouse.position = startPos				#Set mouse position	
 
 while grayThresh < 255:
 
-	print("GrayThresh :", grayThresh)
-	print((grayThresh / 255) * 100, "%")
+	print("GrayThresh :", grayThresh)		#Prints the current max rgb value
+	print((grayThresh / 255) * 100, "%")	#Prints the percentage (%)
 	
-	for i in range(len(img)):
-		mouse.position = (400, mouse.position[1])
+	for i in range(len(img)):				#For each row:
+		mouse.position = (startPos[0], mouse.position[1])
 		mouse.move(0, 1)
-		for j in range(len(img[i])):
-			if keyboard.shift_pressed:		#FAIL SAFE <NOT WORKING!!!>
-				grayThresh = 500			#End loop
-		
-			if grayThresh - threshStep < img[i, j, 0] <= grayThresh:
-				mouse.click(Button.left, 1)
-				time.sleep(0.0005)
-			mouse.move(1, 0)
+		for j in range(len(img[i])):		#For each column:
+			if grayThresh - threshStep < img[i, j, 0] <= grayThresh:	#If pixel(i(x), j(y)) has color darker than
+																		#the current max rgb value (grayThresh) and brighter
+																		#than the grayThresh before:
+				mouse.click(Button.left, 1)		#Click (paint)
+				time.sleep(0.0005)				#Some delay (This is needed for ms paint to properly register the clicks)
+			mouse.move(1, 0)					#Move mouse cursor to the next pixel
 			#print(mouse.position)
 			
 				
-	grayThresh += threshStep
+	grayThresh += threshStep		#After it scanned through the whole image, increase max rgb value (grayThresh)
+									#by threshStep
 	
 	print("GrayThresh :", grayThresh)
+	
+	#	<<ENTERING RGB VALUES>>
+	# All delays (time.sleep) are needed for ms paint to register the mouse / keyboard actions
+	# They can be shortened
 	
 	mouse.position = (1030, 80)		#SELECT COLOR Button pixel coordinates
 	mouse.click(Button.left, 1)
@@ -77,7 +83,7 @@ while grayThresh < 255:
 	time.sleep(0.05)
 	keyboard.press(Key.delete)
 	time.sleep(0.05)
-	keyboard.type(str(grayThresh))
+	keyboard.type(str(grayThresh))	#Enter the max rgb value (grayThresh) in COLOR\RED
 	
 	mouse.position = (1200, 630)	#SELECT COLOR\BLUE Button pixel coordinates
 	mouse.click(Button.left, 1)
@@ -94,7 +100,7 @@ while grayThresh < 255:
 	time.sleep(0.05)
 	keyboard.press(Key.delete)
 	time.sleep(0.05)
-	keyboard.type(str(grayThresh))
+	keyboard.type(str(grayThresh))	#Enter the max rgb value (grayThresh) in COLOR\BLUE
 	
 	mouse.position = (1200, 660)	#SELECT COLOR\GREEN Button pixel coordinates
 	mouse.click(Button.left, 1)
@@ -111,11 +117,11 @@ while grayThresh < 255:
 	time.sleep(0.05)
 	keyboard.press(Key.delete)
 	time.sleep(0.05)
-	keyboard.type(str(grayThresh))
+	keyboard.type(str(grayThresh))	#Enter the max rgb value (grayThresh) in COLOR\GREEN
 	
 	time.sleep(0.1)
 	mouse.position = (740, 685)		#OK Button pixel coordinates
-	mouse.click(Button.left, 1)
-	mouse.position = (400, 400)
+	mouse.click(Button.left, 1)		#Clicks it, returns to canvas
+	mouse.position = startPos		#Reseting mouse position to starting position
 	time.sleep(0.1)
 	
