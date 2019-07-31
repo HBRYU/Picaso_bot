@@ -1,6 +1,6 @@
 # 2019_7_31
 # Picaso V1.1 Work in progress.
-# - Install OpenCV and pynput (pip install opencv-python pynput).
+# - Install OpenCV, pynput, and pillow (pip install opencv-python pynput pillow).
 # - Do not touch or move the mouse while running.
 # - To terminate, press ESC.
 
@@ -183,5 +183,4 @@ def draw_image(imgPath):
 # Keyboard termination, ESC
 listener = Listener(on_press=on_press)
 listener.start()
-time.sleep(5)
 draw_image("Images/Wizard.png")
