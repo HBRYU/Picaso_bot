@@ -1,127 +1,186 @@
-#2019_7_29
-#Picaso V1.0 Work in progress By u/HBRYU
-# - Set ms paint to fullscreen before running this script
-# - Do not touch or move the mouse while running, unless you want to shut it down.
-# - ALL PIXEL COORDINATE VALUES ARE SET FOR 1920 * 1080 DISPLAY. If your moniter has a different
-# 	aspect ratio, please set the coordinates to your value
-# - Install OpenCV and pynput (pip install {opencv-python/pynput})
+# 2019_7_31
+# Picaso V1.1 Work in progress.
+# - Install OpenCV, pynput, and pillow (pip install opencv-python pynput pillow).
+# - Do not touch or move the mouse while running.
+# - To terminate, press ESC.
 
-# I don't have much time to improve algorithm, such as only painting on the required pixels
-# instead of scanning through the whole canvas like a printer. I'll be on it.
-
-# Also, there is no fail safe... so if it goes wrong you just have to repeatedly spam alt+F4
-# on the command prompt and prey that it to somehow shuts down. If you can *reach it.*
+import cv2
+import os
+import time
+import numpy as np
+from PIL import ImageGrab
 
 from pynput.keyboard import Key, Controller as KeyboardController
 from pynput.mouse import Button, Controller as MouseController
 
+from pynput.keyboard import Listener
+
 keyboard = KeyboardController()
 mouse = MouseController()
-import cv2
-import numpy as np
-import os
-import time
 
 mouse = MouseController()
 keyboard = KeyboardController()
 
-img = cv2.imread("Mario.png") #Your image file in the same directory of this script
-grayThresh = 0							#Gray brightness value AKA current max rgb value
-threshStep = 30						#Gray brightness value increase amount
+# Start ms paint maximized using cmd commands.
+os.system("Start /max mspaint")
+# Wait for ms paint to actually start before spamming left click.
+time.sleep(1)
+# Drawing top left starting point pixel coordinates.
+# Tweak this based on monitor resolution
+START_POS = (200, 200)
+# Set mouse position.
+mouse.position = START_POS
 
-os.system("Start mspaint")				#Start ms paint using cmd commands
 
-time.sleep(1)							#Wait for ms paint to actually start before spamming left click
+def on_press(key):
+    # print("{} pressed".format(key))
+    if key == Key.esc:
+        os._exit(1)
 
-startPos = (400, 400)					#Drawing top left starting point pixel coordinates
 
-mouse.position = startPos				#Set mouse position	
+def find_edit_button():
+    edit_colors_button = cv2.imread("templates/edit_colors_button.png")
+    h, w, c = edit_colors_button.shape
 
-while grayThresh < 255:
+    # Grab an image of the application.
+    img = ImageGrab.grab(bbox=None)
+    img = np.array(img)
+    # Convert to standard RGB.
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-	print("GrayThresh :", grayThresh)		#Prints the current max rgb value
-	print((grayThresh / 255) * 100, "%")	#Prints the percentage (%)
-	
-	for i in range(len(img)):				#For each row:
-		mouse.position = (startPos[0], mouse.position[1])
-		mouse.move(0, 1)
-		for j in range(len(img[i])):		#For each column:
-			if grayThresh - threshStep < img[i, j, 0] <= grayThresh:	#If pixel(i(x), j(y)) has color darker than
-																		#the current max rgb value (grayThresh) and brighter
-																		#than the grayThresh before:
-				mouse.click(Button.left, 1)		#Click (paint)
-				time.sleep(0.0005)				#Some delay (This is needed for ms paint to properly register the clicks)
-			mouse.move(1, 0)					#Move mouse cursor to the next pixel
-			#print(mouse.position)
-			
-				
-	grayThresh += threshStep		#After it scanned through the whole image, increase max rgb value (grayThresh)
-									#by threshStep
-	
-	print("GrayThresh :", grayThresh)
-	
-	#	<<ENTERING RGB VALUES>>
-	# All delays (time.sleep) are needed for ms paint to register the mouse / keyboard actions
-	# They can be shortened
-	
-	mouse.position = (1030, 80)		#SELECT COLOR Button pixel coordinates
-	mouse.click(Button.left, 1)
-	time.sleep(0.5)
-	
-	mouse.position = (1200, 600)	#SELECT COLOR\RED Button pixel coordinates
-	mouse.click(Button.left, 1)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.type(str(grayThresh))	#Enter the max rgb value (grayThresh) in COLOR\RED
-	
-	mouse.position = (1200, 630)	#SELECT COLOR\BLUE Button pixel coordinates
-	mouse.click(Button.left, 1)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.type(str(grayThresh))	#Enter the max rgb value (grayThresh) in COLOR\BLUE
-	
-	mouse.position = (1200, 660)	#SELECT COLOR\GREEN Button pixel coordinates
-	mouse.click(Button.left, 1)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.backspace)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.press(Key.delete)
-	time.sleep(0.05)
-	keyboard.type(str(grayThresh))	#Enter the max rgb value (grayThresh) in COLOR\GREEN
-	
-	time.sleep(0.1)
-	mouse.position = (740, 685)		#OK Button pixel coordinates
-	mouse.click(Button.left, 1)		#Clicks it, returns to canvas
-	mouse.position = startPos		#Reseting mouse position to starting position
-	time.sleep(0.1)
-	
+    # Match to template edit button image.
+    res = cv2.matchTemplate(img, edit_colors_button, cv2.TM_SQDIFF)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    top_left = min_loc
+    bottom_right = (top_left[0] + w, top_left[1] + h)
+
+    # Calculate coordinates of button center.
+    center = ((top_left[0] + bottom_right[0]) / 2, (top_left[1] + bottom_right[1]) / 2)
+    return center
+
+
+def find_fields():
+    field = cv2.imread("templates/color_field.png")
+    ok_button = cv2.imread("templates/ok_button.png")
+    h, w, c = field.shape
+
+    # Grab an image of the application.
+    img = ImageGrab.grab(bbox=None)
+    img = np.array(img)
+    # Convert to standard RGB.
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Match to template field image.
+    res = cv2.matchTemplate(img, field, cv2.TM_SQDIFF)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    top_left = min_loc
+    bottom_right = (top_left[0] + w, top_left[1] + h)
+
+    # Calculate coordinates of fields, assuming constant distance between boxes.
+    red = ((top_left[0] + bottom_right[0]) / 2, (top_left[1] + bottom_right[1]) / 2)
+    blue = (red[0], red[1] + 20)
+    green = (red[0], red[1] + 40)
+
+    # Match to template OK button.
+    res = cv2.matchTemplate(img, ok_button, cv2.TM_SQDIFF)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    top_left = min_loc
+    bottom_right = (top_left[0] + w, top_left[1] + h)
+    button = ((top_left[0] + bottom_right[0]) / 2, (top_left[1] + bottom_right[1]) / 2)
+
+    ret = {
+        "red": red,
+        "blue": blue,
+        "green": green,
+        "ok": button
+    }
+    # cv2.rectangle(img, top_left, bottom_right, 255, 2)
+    return ret
+
+
+def clear_field():
+    for i in range(3):
+        time.sleep(0.05)
+        keyboard.press(Key.backspace)
+        time.sleep(0.05)
+        keyboard.press(Key.delete)
+
+
+def update_RGB(grayThresh):
+    # SELECT COLOR Button pixel coordinates
+    mouse.position = find_edit_button()
+    mouse.click(Button.left, 1)
+    time.sleep(0.5)
+    fields = find_fields()
+
+    # SELECT COLOR\RED Button pixel coordinates
+    mouse.position = fields["red"]
+    mouse.click(Button.left, 1)
+    clear_field()
+    # Enter the max rgb value (grayThresh) in COLOR\RED
+    keyboard.type(str(grayThresh))
+
+    # SELECT COLOR\BLUE Button pixel coordinates
+    mouse.position = fields["blue"]
+    mouse.click(Button.left, 1)
+    clear_field()
+    # Enter the max rgb value (grayThresh) in COLOR\BLUE
+    keyboard.type(str(grayThresh))
+
+    # SELECT COLOR\GREEN Button pixel coordinates
+    mouse.position = fields["green"]
+    mouse.click(Button.left, 1)
+    clear_field()
+    # Enter the max rgb value (grayThresh) in COLOR\GREEN
+    keyboard.type(str(grayThresh))
+
+    time.sleep(0.1)
+    # OK Button pixel coordinates
+    mouse.position = fields["ok"]
+    # Clicks it, returns to canvas
+    mouse.click(Button.left, 1)
+    # Reseting mouse position to starting position
+    mouse.position = START_POS
+    time.sleep(0.1)
+
+
+def draw_image(imgPath):
+    img = cv2.imread(imgPath)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # Gray brightness value AKA current max rgb value
+    grayThresh = 0
+    # Gray brightness value increase amount
+    # Tweak for speed
+    threshStep = 1
+
+    while grayThresh < 255:
+        # Prints the current max rgb value
+        print("GrayThresh :", grayThresh)
+        # Prints the percentage (%)
+        print(str(int((grayThresh / 255) * 100)) + "%")
+
+        # Skip values that aren't present in the image
+        if grayThresh in img:
+            print("GrayThresh: " + str(grayThresh))
+            update_RGB(grayThresh)
+        else:
+            grayThresh += threshStep
+            continue
+
+        for i in range(len(img)):
+            mouse.position = (START_POS[0], mouse.position[1])
+            mouse.move(0, 1)
+            for j in range(len(img[i])):
+                if grayThresh - threshStep < img[i, j, 0] and img[i, j, 0] <= grayThresh:
+                    # Click (paint)
+                    mouse.click(Button.left, 1)
+                    # Speed, faster more errors
+                    time.sleep(0.0005)
+                mouse.move(1, 0)
+        grayThresh += threshStep
+
+
+# Keyboard termination, ESC
+listener = Listener(on_press=on_press)
+listener.start()
+draw_image("Images/Wizard.png")
